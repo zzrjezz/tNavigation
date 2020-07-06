@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>pack2</title>
+    <link rel="stylesheet" href="/layui-src/src/css/layui.css">
+    <script src="/layui-src/src/layui.js"></script>
+    <style>
+        #show{
+            width: 100px;
+            height: 100px;
+        }
+        .btn-sty{
+            width: 100px;
+            height: 100px;
+        }
+        body{
+            background: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<!--<form action="http://localhost:3000/uploads" method="post" enctype="multipart/form-data">-->
+<!--    <input type="file" name="logo" />-->
+<!--    <input type="text" name="hello">-->
+<!--    <input type="submit" value="提交">-->
+<!--</form>
+文件上传
+-->
+
+
+<!--个人中心界面-->
+<div class="layui-container">
+    <h1 id="show_Uname">这是1号标题</h1>
+    <div class="layui-row">
+        <div class="layui-col-md9 ">
+
+            账号(id注册请使用纯数字)<input type="text" name="user_id" id="id"  class="layui-input" placeholder="请输入账号">
+            密码<input type="text" name="user_key" id="key" class="layui-input" placeholder="请输入密码"><br/>
+            昵称<input type="text" name="user_uname" id="uname" class="layui-input"><br/>
+            阅历<textarea  type="text" name="user_experience" id="experience" class="layui-textarea"></textarea>>
+            个人签名<textarea type="text" name="user_signature" id="signature" class="layui-textarea"></textarea>>
+        </div>
+        <div class="layui-col-md3">
+
+
+
+
+
+
+            <i class="layui-icon layui-icon-face-smile"></i>
+
+
+            <button onclick="register()" type="button" class="layui-btn layui-btn-radius " >注册</button>
+            <button onclick="login()" type="button" class="layui-btn layui-btn-radius layui-btn-normal">登录</button>
+            <button onclick="updata()" type="button" class="layui-btn layui-btn-radius layui-btn-warm">修改个人资料</button>
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
+
+var url='http://5ffsvg.natappfree.cc';
+
+    //注册方法
+function register() {
+    var id=document.getElementById('id').value
+    var key=document.getElementById('key').value
+    axios.post(url+'/register', {
+        Id: id,
+        Key: key
+    })
+        .then(function (response) {
+            console.log(response);
+            alert(response.data)
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+}
+
+//登录方法
+    function login() {
+        var id=document.getElementById('id').value
+        var key=document.getElementById('key').value
+        axios.post(url+'/login', {
+            Id: id,
+            Key: key
+        })
+            .then(function (response) {
+                console.log(response);
+                // console.log(response.data.Signature);
+                if(response.data!='登录失败:账号或密码错误'){
+                    alert('登录成功')
+                    console.log(response.data)
+                    document.getElementById('experience').value=response.data.Experience
+                    document.getElementById('signature').value=response.data.Signature
+                    document.getElementById('uname').value=response.data.Uname
+                    document.getElementById('show_Uname').innerText='“'+response.data.Uname+'“'+'的个人中心'
+
+                }
+                else{
+                    alert(response.data)
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    //更新数据方法
+    function updata() {
+        var id=document.getElementById('id').value
+        var key=document.getElementById('key').value
+        var experience=document.getElementById('experience').value
+        var signature=document.getElementById('signature').value
+        var uname=document.getElementById('uname').value
+        axios.post(url+'/updata', {
+            Id: id,
+            Key: key,
+            Experience:experience,
+            Signature:signature,
+            Uname:uname
+        })
+            .then(function (response) {
+                console.log(response);
+                if(response.data!='修改失败'){
+                    alert('修改成功')
+                }
+                else{
+                    alert(response.data)
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+function showtxt() {
+var text=document.getElementById('id').value
+    alert(text)
+}
+
+
+
+
+</script>
+</html>

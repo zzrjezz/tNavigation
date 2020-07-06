@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <!--  //Viewport 移动端优化-->
+  <title>Title</title>
+  <script type="text/javascript"
+          src="https://webapi.amap.com/maps?v=1.4.15&key=4ed2549de5eab0de2a948823d9ab1ebd"></script>
+  <style>
+    #container {
+      width: 600px;
+      height: 600px;
+    }
+
+    .info {
+      position: relative;
+      top: 0;
+      right: 0;
+      min-width: 0;
+      color: #97b6c2;
+      border: none;
+    }
+
+    .content-window-card {
+      position: relative;
+      box-shadow: none;
+      bottom: 0;
+      left: 0;
+      width: auto;
+      padding: 0;
+    }
+
+    .content-window-card p {
+      height: 2rem;
+    }
+
+    .custom-info {
+      border: solid 1px silver;
+    }
+
+    div.info-top {
+      position: relative;
+      background: none repeat scroll 0 0 #F9F9F9;
+      border-bottom: 1px solid #CCC;
+      border-radius: 5px 5px 0 0;
+    }
+
+    div.info-top div {
+      display: inline-block;
+      color: #333333;
+      font-size: 14px;
+      font-weight: bold;
+      line-height: 31px;
+      padding: 0 10px;
+    }
+
+    div.info-top img {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      transition-duration: 0.25s;
+    }
+
+    div.info-top img:hover {
+      box-shadow: 0px 0px 5px #000;
+    }
+
+    div.info-middle {
+      font-size: 12px;
+      padding: 10px 6px;
+      line-height: 20px;
+    }
+
+    div.info-bottom {
+      height: 0px;
+      width: 100%;
+      clear: both;
+      text-align: center;
+    }
+
+    div.info-bottom img {
+      position: relative;
+      z-index: 104;
+    }
+
+    span {
+      margin-left: 5px;
+      font-size: 11px;
+    }
+
+    .info-middle img {
+      float: left;
+      margin-right: 6px;
+    }
+
+    .Small-size {
+      width: 150px;
+      height: 100px;
+    }
+
+    .Introduction {
+      direction: unset;
+      text-decoration: none;
+    }
+  </style>
+
+</head>
+<body>
+<div id="container"></div>
+
+<div class="info">
+  <h4 id='status'></h4>
+  <hr>
+  <p id='result'></p>
+  <hr>
+  <p>由于众多浏览器已不再支持非安全域的定位请求，为保位成功率和精度，请升级您的站点到HTTPS。</p>
+</div>
+<!--定位结果容器-->
+<a href="./form">个人中心</a>
+
+<a href="Ucenter.html">(本地跳转)个人中心</a>
+</body>
+
+
+<script type="text/javascript">
+  //初始化地图
+  var map = new AMap.Map('container', {
+    resizeEnable: true,
+    center: [110.298048, 25.27175],
+    zoom: 15
+  });
+
+
+  AMap.plugin(['AMap.ToolBar', 'AMap.Walking'], function () {
+    var toolbar = new AMap.ToolBar();
+    map.addControl(toolbar);
+    var walking = new AMap.ToolBar();
+    map.addControl(walking);
+  });
+  //异步加载插件
+
+  var walking = new AMap.Walking({
+    map: map
+  });
+  //初始化步行插件
+
+//初始化定位插件
+  AMap.plugin('AMap.Geolocation', function () {
+    var geolocation = new AMap.Geolocation({
+      enableHighAccuracy: true,//是否使用高精度定位，默认:true
+      timeout: 10000,          //超过10秒后停止定位，默认：5s
+      buttonPosition: 'RB',    //定位按钮的停靠位置
+      buttonOffset: new AMap.Pixel(10, 20),//定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+      zoomToAccuracy: true,   //定位成功后是否自动调整地图视野到定位点
+
+    });
+
+    //使用定位插件,传递实参
+    map.addControl(geolocation);
+    geolocation.getCurrentPosition(function (status, result) {
+      if (status == 'complete') {
+        onComplete(result)
+      } else {
+        onError(result)
+      }
+    });
+  });
+  //解析定位结果
+  // var kk='110.295184,25.266438'
+  var mypoint = new AMap.LngLat(110.295184, 25.266438)
+
+  function onComplete(data) {
+    document.getElementById('status').innerHTML = '定位成功'
+    var str = [];
+    str.push('定位结果：' + data.position);
+
+
+    alert(data.position + '位置已获取')
+
+    mypoint = data.position
+
+    alert('您的当前位置是：'+mypoint)
+
+    str.push('定位类别：' + data.location_type);
+    if (data.accuracy) {
+      str.push('精度：' + data.accuracy + ' 米');
+    }//如为IP精确定位结果则没有精度信息
+    str.push('是否经过偏移：' + (data.isConverted ? '是' : '否'));
+    document.getElementById('result').innerHTML = str.join('<br>');
+    // mypoint = data.position.toString()
+    // mypoint=data
+    // alert(mypoint)
+  }
+
+  //解析定位错误信息
+  function onError(data) {
+    document.getElementById('status').innerHTML = '定位失败'
+    document.getElementById('result').innerHTML = '失败原因排查信息:' + data.message;
+  }
+
+  //定位内容显示
+
+
+  // 创建一个 Marker 实例：
+  // var marker = new AMap.Marker({
+  //   position: new AMap.LngLat(116.39, 39.9),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+  //   title: '北京'
+  //   // content:'content内容'
+  // });
+
+  // 创建一个 Marker象鼻山 实例：
+  var marker_ShuiyueCave = new AMap.Marker({
+    position: new AMap.LngLat(110.298048, 25.27175),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+    title: '水月洞',
+  });
+
+  var marker_LoveIsland = new AMap.Marker({
+    position: new AMap.LngLat(110.296608, 25.269269),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+    title: '爱情岛',
+  });
+
+  var marker_ElephantTrunkHillSquare = new AMap.Marker({
+    position: new AMap.LngLat(110.293403, 25.267423),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+    title: '象鼻山广场',
+  });
+
+  var marker_TaipingHeavenlyKingdomMemorialHall = new AMap.Marker({
+    position: new AMap.LngLat(110.295184, 25.266438),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+    title: '太平天国纪念馆',
+  });
+
+  var marker_PuxianPagoda = new AMap.Marker({
+    position: new AMap.LngLat(110.296053, 25.267224),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+    title: '普贤塔',
+  });
+
+  var marker_LijiangRiver = new AMap.Marker({
+    position: new AMap.LngLat(110.29571, 25.267646),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+    title: '漓江',
+  });
+
+  // var marker_LijiangRive = new AMap.Marker({
+  //   position: new AMap.LngLat(110.29500, 25.267646),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+  //   title: '漓',
+  // });
+
+  // 110.298048,25.27175 水月洞
+  // 110.296608,25.269269  爱情岛
+  // 110.293403,25.267423 象鼻山广场
+  // 110.295184,25.266438 太平天国纪念馆
+  // 110.296053,25.267224 普贤塔
+  // 110.29571,25.267646 漓江
+
+  // 将创建的点标记添加到已有的地图实例：
+  // map.add(marker);
+  map.add(marker_ShuiyueCave)
+  map.add(marker_LoveIsland)
+  map.add(marker_ElephantTrunkHillSquare)
+  map.add(marker_TaipingHeavenlyKingdomMemorialHall)
+  map.add(marker_PuxianPagoda)
+  map.add(marker_LijiangRiver)
+  // map.add(marker_LijiangRive)
+
+  // 移除已创建的 marker
+  // map.remove(marker);
+
+  // marker.setLabel({
+  //   offset: new AMap.Pixel(80,30),  //设置文本标注偏移量
+  //   content: "<div class='info'>显示景点名称</div>", //设置文本标注内容
+  //   direction: 'left' //设置文本标注方位
+  // });
+  //设置点的Label
+
+  var mypoint_ShuiyueCave = new AMap.LngLat(110.298048, 25.27175)
+  var mypoint_LoveIsland = new AMap.LngLat(110.296608, 25.269269)
+  var mypoint_ElephantTrunkHillSquare = new AMap.LngLat(110.293403, 25.267423)
+  var mypoint_TaipingHeavenlyKingdomMemorialHall = new AMap.LngLat(110.295184, 25.266438)
+  var mypoint_PuxianPagoda = new AMap.LngLat(110.296053, 25.267224)
+  var mypoint_LijiangRiver = new AMap.LngLat(110.29571, 25.267646)
+  //景点经纬度(导航用)
+
+  marker_ShuiyueCave.setLabel({
+    offset: new AMap.Pixel(80, 30),  //设置文本标注偏移量
+    content: "<div class='info'>水月洞</div>", //设置文本标注内容
+    direction: 'left' //设置文本标注方位
+  });
+  //设置象鼻山点的Label
+
+
+  //添加点击事件
+  AMap.event.addListener(marker_ShuiyueCave, 'click', function () {
+    infoWindow_ShuiyueCave.open(map, marker_ShuiyueCave.getPosition());
+  })
+
+  AMap.event.addListener(marker_LoveIsland, 'click', function () {
+    infoWindow_LoveIsland.open(map, marker_LoveIsland.getPosition());
+  })
+
+  AMap.event.addListener(marker_ElephantTrunkHillSquare, 'click', function () {
+    infoWindow_ElephantTrunkHillSquare.open(map, marker_ElephantTrunkHillSquare.getPosition());
+  })
+
+  AMap.event.addListener(marker_TaipingHeavenlyKingdomMemorialHall, 'click', function () {
+    infoWindow_TaipingHeavenlyKingdomMemorialHall.open(map, marker_TaipingHeavenlyKingdomMemorialHall.getPosition());
+  })
+
+  AMap.event.addListener(marker_PuxianPagoda, 'click', function () {
+    infoWindow_PuxianPagoda.open(map, marker_PuxianPagoda.getPosition());
+  })
+
+  AMap.event.addListener(marker_LijiangRiver, 'click', function () {
+    infoWindow_LijiangRiver.open(map, marker_LijiangRiver.getPosition());
+  })
+
+
+
+  //景点信息数组(内容)
+  var title_ShuiyueCave = '水月洞'
+  content_ShuiyueCave = [];
+  content_ShuiyueCave.push("<img class='Small-size' src='/ShuiyueCave.jpeg'>简介：象山海拔200米高出水面55米。是桂林喀斯特岩溶地貌的典型代表，形成于3.6亿年前，由海底沉积的石灰岩...");
+  content_ShuiyueCave.push("<a class='Introduction' href='/ShuiyueCave.html' target='_blank'>查看详细介绍</a>");
+  content_ShuiyueCave.push('<button onclick="findway(mypoint_ShuiyueCave)">到这去</button>');
+
+  var title_LoveIsland = '爱情岛'
+  content_LoveIsland = [];
+  content_LoveIsland.push("<img class='Small-size' src='/LoveIsland.jpeg'>简介：爱情岛是桂林的母亲河漓江孕育的杰作，也是桂林人培养爱情的摇篮，1983年桂林市政府为了保护漓江的生态平衡，为河道清淤时用泥沙堆积形成的小岛，总面积...");
+  content_LoveIsland.push("<a class='Introduction' href='/LoveIsland.html' target='_blank'>查看详细介绍</a>");
+  content_LoveIsland.push('<button onclick="findway(mypoint_LoveIsland)">到这去</button>');
+
+  var title_ElephantTrunkHillSquare = '象鼻山广场'
+  content_ElephantTrunkHillSquare = [];
+  content_ElephantTrunkHillSquare.push("<img class='Small-size' src='/ElephantTrunkHillSquare.jpg'>简介：象山广场始建于1998年，占地面积12287平方米。在广场种有桂花树近百株且整个广场呈桂花型，达到与市徽相呼应的效果。桂花是我市的市花，每年农历8月桂花开时，桂林满城飘香，沁人心...");
+  content_ElephantTrunkHillSquare.push("<a class='Introduction' href='/ElephantTrunkHillSquare.html' target='_blank'>查看详细介绍</a>");
+  content_ElephantTrunkHillSquare.push('<button onclick="findway(mypoint_ElephantTrunkHillSquare)">到这去</button>');
+
+  var title_TaipingHeavenlyKingdomMemorialHall = '太平天国纪念馆'
+  content_TaipingHeavenlyKingdomMemorialHall = [];
+  content_TaipingHeavenlyKingdomMemorialHall.push("<img class='Small-size' src='/TaipingHeavenlyKingdomMemorialHall.jpg'>简介：太平天国纪念馆云峰寺是个红墙绿瓦，硬山式二进五开间的仿古建筑，在内院中，设置有太平军东南西北五大将领的铜像，院内的墙上有些文字资料，记载太平军攻打桂林时发生过的真实的小故事...");
+  content_TaipingHeavenlyKingdomMemorialHall.push("<a class='Introduction' href='/TaipingHeavenlyKingdomMemorialHall.html' target='_blank'>查看详细介绍</a>");
+  content_TaipingHeavenlyKingdomMemorialHall.push('<button onclick="findway(mypoint_TaipingHeavenlyKingdomMemorialHall)">到这去</button>');
+
+  var title_PuxianPagoda = '普贤塔'
+  content_PuxianPagoda = [];
+  content_PuxianPagoda.push("<img class='Small-size' src='/PuxianPagoda.jpeg'>简介：象鼻山顶上耸立的是普贤宝塔，宝塔建于明代，距今已有400多年的历史。塔高13.6米是一座喇嘛式实心砖塔，在塔身的正北面有一副青石线刻的菩萨像，像的上端刻有“南无普贤菩萨”六字真言，故而得名普...");
+  content_PuxianPagoda.push("<a class='Introduction' href='/PuxianPagoda.html' target='_blank'>查看详细介绍</a>");
+  content_PuxianPagoda.push('<button onclick="findway(mypoint_PuxianPagoda)">到这去</button>');
+
+  var title_LijiangRiver = '漓江'
+  content_LijiangRiver = [];
+  content_LijiangRiver.push("<img class='Small-size' src='/LijiangRiver.jpg'>简介：漓江是桂林人的母亲河，发源于华南的最高峰猫儿山，属于珠江水系。全长426公里，其中从桂林至阳朔有83公里的河段被誉为百里画廊，是漓江的精华所在。据说漓江有99道弯...");
+  content_LijiangRiver.push("<a class='Introduction' href='/LijiangRiver.html' target='_blank'>查看详细介绍</a>");
+  content_LijiangRiver.push('<button onclick="findway(mypoint_LijiangRiver)">到这去</button>');
+
+
+  //自定义窗体(实例化)
+  var infoWindow_ShuiyueCave = new AMap.InfoWindow({
+    isCustom: true,
+    content: createInfoWindow(title_ShuiyueCave, content_ShuiyueCave.join("<br/>")),
+    offset: new AMap.Pixel(16, -45)
+  });
+
+  var infoWindow_LoveIsland = new AMap.InfoWindow({
+    isCustom: true,
+    content: createInfoWindow(title_LoveIsland, content_LoveIsland.join("<br/>")),
+    offset: new AMap.Pixel(16, -45)
+  });
+
+  var infoWindow_ElephantTrunkHillSquare = new AMap.InfoWindow({
+    isCustom: true,
+    content: createInfoWindow(title_ElephantTrunkHillSquare, content_ElephantTrunkHillSquare.join("<br/>")),
+    offset: new AMap.Pixel(16, -45)
+  });
+
+  var infoWindow_TaipingHeavenlyKingdomMemorialHall = new AMap.InfoWindow({
+    isCustom: true,
+    content: createInfoWindow(title_TaipingHeavenlyKingdomMemorialHall, content_TaipingHeavenlyKingdomMemorialHall.join("<br/>")),
+    offset: new AMap.Pixel(16, -45)
+  });
+
+  var infoWindow_PuxianPagoda = new AMap.InfoWindow({
+    isCustom: true,
+    content: createInfoWindow(title_PuxianPagoda, content_PuxianPagoda.join("<br/>")),
+    offset: new AMap.Pixel(16, -45)
+  });
+
+  var infoWindow_LijiangRiver = new AMap.InfoWindow({
+    isCustom: true,
+    content: createInfoWindow(title_LijiangRiver, content_LijiangRiver.join("<br/>")),
+    offset: new AMap.Pixel(16, -45)
+  });
+
+
+  //构建自定义信息窗体(弹出窗体约束)
+  function createInfoWindow(title, content) {
+    var info = document.createElement("div");
+    info.className = "custom-info input-card content-window-card";
+
+    //可以通过下面的方式修改自定义窗体的宽高
+    //info.style.width = "400px";
+    // 定义顶部标题
+    var top = document.createElement("div");
+    var titleD = document.createElement("div");
+    var closeX = document.createElement("img");
+    top.className = "info-top";
+    titleD.innerHTML = title;
+    closeX.src = "https://webapi.amap.com/images/close2.gif";
+    closeX.onclick = closeInfoWindow;
+
+    top.appendChild(titleD);
+    top.appendChild(closeX);
+    info.appendChild(top);
+
+    // 定义中部内容
+    var middle = document.createElement("div");
+    middle.className = "info-middle";
+    middle.style.backgroundColor = 'white';
+    middle.innerHTML = content;
+    info.appendChild(middle);
+
+    // 定义底部内容
+    var bottom = document.createElement("div");
+    bottom.className = "info-bottom";
+    bottom.style.position = 'relative';
+    bottom.style.top = '0px';
+    bottom.style.margin = '0 auto';
+    var sharp = document.createElement("img");
+    sharp.src = "https://webapi.amap.com/images/sharp.png";
+    bottom.appendChild(sharp);
+
+    info.appendChild(bottom);
+    return info;
+  }
+
+  //关闭信息窗体
+  function closeInfoWindow() {
+    map.clearInfoWindow();
+  }
+
+  //导航方法(自点到目标点)
+  function findway(data) {
+    walking.search(mypoint, data, function (status, result) {
+      if (status === 'complete') {
+        console.log('成功导航')
+      } else {
+        console.log('失败了' + result)
+      }
+
+    })
+  }
+
+  // function findway() {
+  //   walking.search(mypoint, new AMap.LngLat(116.427281, 39.903719), function (status, result) {
+  //     if (status === 'complete') {
+  //       console.log('成功导航')
+  //     } else {
+  //       console.log('失败了' + result)
+  //     }
+  //
+  //   })
+  // }
+  //可用轨迹备份
+
+</script>
+</html>
