@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.js"></script>
+</head>
+<body>
+	<select name="yourName" id="yourId">
+	<option value="1">1</option>
+	<option value="2">2</option>
+	<option value="3">3</option>
+	<option value="4">4</option>
+	<option value="5">5</option>
+	</select>
+<div id="app">
+    {{name}}
+</div>
+
+<script>
+    new Vue({
+            el: '#app',
+            data () {
+return {
+    name:"tom"
+}
+            },
+
+        }
+    )
+</script>
+</body>
+</html>
